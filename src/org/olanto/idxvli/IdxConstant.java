@@ -231,6 +231,8 @@ public class IdxConstant {
     public static int DOCNAME_MAX_EXPANSION = 1000;
     /** maximum de nom collecter avant tri  */
     public static int DOCNAME_MAX_BROWSE = 5000;
+    /** search expression are insensitive by default  */
+    public static boolean DOCNAME_BROWSE_INSENSITIVE = true;
     /*************************************************************************************/
     /** ajoute les statisques dans myQuote  */
     public static boolean MYQUOTE_STAT = true;
@@ -368,13 +370,14 @@ public class IdxConstant {
                 + "\n         STEM_CACHE_COUNT: " + STEM_CACHE_COUNT
                 + "\n         STEM_KEEP_LIST: " + STEM_KEEP_LIST
                 + "\n         ACTUAL_LANGUAGE: " + ACTUAL_LANGUAGE
-                + "\n     WILDCAHR"
+                + "\n     WILDCHAR"
                 + "\n         WORD_EXPANSION: " + WORD_EXPANSION
                 + "\n         WORD_EXPANSION_RELOAD: " + WORD_EXPANSION_RELOAD
                 + "\n         WORD_MAX_EXPANSION: " + WORD_MAX_EXPANSION
                 + "\n         DOCNAME_EXPANSION: " + DOCNAME_EXPANSION
                 + "\n         DOCNAME_EXPANSION_RELOAD: " + DOCNAME_EXPANSION_RELOAD
                 + "\n         DOCNAME_MAX_EXPANSION: " + DOCNAME_MAX_EXPANSION
+                + "\n         DOCNAME_BROWSE_INSENSITIVE: " + DOCNAME_BROWSE_INSENSITIVE
                 + "\n    OBJSTO_IMPLEMENTATION: " + OBJ_IMPLEMENTATION
                 + "\n         OBJ_PW2: " + OBJ_PW2
                 + "\n         OBJ_NB: " + OBJ_NB

@@ -68,6 +68,7 @@ public class Browse_Basic implements BrowseManager {
         System.out.println("Browse query :"+request);
         QLResultNice res = null;
         TimerNano time = new TimerNano(request, true);
+        if (DOCNAME_BROWSE_INSENSITIVE){request="(?i)"+request;}  // set insensitive pattern      
         String[] docname = id.docNameExpander.getExpand(request, langS, collections, DOCNAME_MAX_BROWSE, onlyOnFileName);  // difficile de ne pas ramener beaucoup pour être sur de bien trier
 
         if (docname == null) {// forme une réponse vide
