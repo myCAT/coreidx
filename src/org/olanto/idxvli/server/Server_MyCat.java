@@ -310,7 +310,7 @@ public class Server_MyCat extends UnicastRemoteObject implements IndexService_My
      * used for myCAT query
      */
     @Override
-    public QLResultNice evalQLNice(String request, int start, int size, String order) throws RemoteException {
+    public QLResultNice evalQLNice(String request, int start, int size, String order, boolean exact, boolean orderbyocc) throws RemoteException {
         serverR.lock();
         try {
             QLResultNice res = id.evalQLNice(cs, request, start, size);
