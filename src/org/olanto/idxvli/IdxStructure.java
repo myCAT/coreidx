@@ -1,22 +1,24 @@
-/**********
-Copyright © 2010-2012 Olanto Foundation Geneva
-
-This file is part of myCAT.
-
-myCAT is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as
-published by the Free Software Foundation, either version 3 of
-the License, or (at your option) any later version.
-
-myCAT is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with myCAT.  If not, see <http://www.gnu.org/licenses/>.
-
- **********/
+/**
+ * ********
+ * Copyright © 2010-2012 Olanto Foundation Geneva
+ *
+ * This file is part of myCAT.
+ *
+ * myCAT is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * myCAT is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with myCAT. If not, see <http://www.gnu.org/licenses/>.
+ *
+ *********
+ */
 package org.olanto.idxvli;
 
 import java.io.*;
@@ -40,7 +42,7 @@ import org.olanto.conman.server.*;
 import org.olanto.idxvli.ref.IdxReference;
 import org.olanto.idxvli.ref.UploadedFile;
 import org.olanto.wildchar.WildCharExpander;
-
+import static org.olanto.idxvli.util.BytesAndFiles.*;
 /*
  *La création d'un index peut ressembler au code suivant:
  *
@@ -60,95 +62,167 @@ import org.olanto.wildchar.WildCharExpander;
  *   quelque chose).
  *
  */
+
 /**
  * Une classe pour construire une structure d'indexation.
- * 
- *<p>
+ *
+ * <p>
  */
 public class IdxStructure {
 
-    /** ordre dans le vecteur d'indexation pour les DOCuments*/
+    /**
+     * ordre dans le vecteur d'indexation pour les DOCuments
+     */
     public static final int DOC = 0;
-    /** ordre dans le vecteur d'indexation pour les OCCurrences*/
+    /**
+     * ordre dans le vecteur d'indexation pour les OCCurrences
+     */
     public static final int OCC = 1;
-    /** ordre dans le vecteur d'indexation pour les indices du VECteur de positions*/
+    /**
+     * ordre dans le vecteur d'indexation pour les indices du VECteur de positions
+     */
     public static final int VEC = 2;
-    /** ce qui est chercher n'est pas trouv� (valeur de retour)*/
+    /**
+     * ce qui est chercher n'est pas trouv� (valeur de retour)
+     */
     public static final int notFind = -1;
-    /** structure contenant les mots non-indexables*/
+    /**
+     * structure contenant les mots non-indexables
+     */
     public SetOfWords dontIndexThis;
-    /** dictionnaire de mots (mot->indice) et (indice->mot)*/
+    /**
+     * dictionnaire de mots (mot->indice) et (indice->mot)
+     */
     public WordManager wordstable;
-    /** dictionnaire de mots (indice->liste des mots sans lemmatisation ayant la m�me racine)*/
+    /**
+     * dictionnaire de mots (indice->liste des mots sans lemmatisation ayant la
+     * m�me racine)
+     */
     public TreeSet<String>[] stemList;
-    /** structure de l'index pour l'indexation*/
+    /**
+     * structure de l'index pour l'indexation
+     */
     public CacheWrite indexdoc;
-    /** structure de l'index pour les positions pour l'indexation*/
+    /**
+     * structure de l'index pour les positions pour l'indexation
+     */
     public CacheWrite indexpos;
-    /** permet la translation des num�ros des mots vers les num�ros d'un cache restreint*/
+    /**
+     * permet la translation des num�ros des mots vers les num�ros d'un cache restreint
+     */
     public CacheTranslate idxtrans;
-    /** structure de l'index pour les positions pour la consultation*/
+    /**
+     * structure de l'index pour les positions pour la consultation
+     */
     public CacheRead_Opti indexread;
-    /** coordinateur des caches lors de l'indexation*/
+    /**
+     * coordinateur des caches lors de l'indexation
+     */
     public CacheCoordinator indexCoord;
-    /** exécuteur des requêtes*/
+    /**
+     * exécuteur des requêtes
+     */
     public QLManager executor;
-    /** exécuteur du browse file*/
+    /**
+     * exécuteur du browse file
+     */
     public BrowseManager browser;
-    /** expandeur pour les wildchar on word */
+    /**
+     * expandeur pour les wildchar on word
+     */
     public WildCharExpander wordExpander;
-    /** expandeur pour les wildchar on document name */
+    /**
+     * expandeur pour les wildchar on document name
+     */
     public WildCharExpander docNameExpander;
-    /** position de l'index des mots et des freq d'un document
-     * <br> rdnbag[i]->information sur l'indexation du i-�me documement
+    /**
+     * position de l'index des mots et des freq d'un document <br>
+     * rdnbag[i]->information sur l'indexation du i-�me documement
      */
     protected long[] rdnbag;
-    /** position de l'index des mots en s�quence d'un document
-     * <br> rdnseq[i]->s�equence des mots  du i-�me documement
+    /**
+     * position de l'index des mots en s�quence d'un document <br>
+     * rdnseq[i]->s�equence des mots du i-�me documement
      */
     protected long[] rdnseq;
-    /** position de l'index des position des mots en s�quence d'un document
-     * <br> rdnposchar[i]->s�equence des positions des mots  du i-�me documement
+    /**
+     * position de l'index des position des mots en s�quence d'un document <br>
+     * rdnposchar[i]->s�equence des positions des mots du i-�me documement
      */
     protected long[] rdnposchar;
-    /** dictionnaire de documents (document->indice) (indice->document)*/
+    /**
+     * dictionnaire de documents (document->indice) (indice->document)
+     */
     public DocumentManager docstable;
-    /** la structure comprend un indexer*/
+    /**
+     * la structure comprend un indexer
+     */
     public IdxIndexer Indexer;
-    /** la structure comprend un module d'interrogation*/
+    /**
+     * la structure comprend un module d'interrogation
+     */
     public IdxQuery Query;
-    /** la structure comprend un module de statistique*/
+    /**
+     * la structure comprend un module de statistique
+     */
     public IdxStatistic Statistic;
-    /** la structure comprend un module de gestion des IO*/
+    /**
+     * la structure comprend un module de gestion des IO
+     */
     public IdxIO IO;
-    /** indice du dernier mot index� mais pas encore en structure WRITE*/
+    /**
+     * indice du dernier mot index� mais pas encore en structure WRITE
+     */
     public int lastRecordedWord = 0;
-    /** indice du dernier mot index� en structure READ*/
+    /**
+     * indice du dernier mot index� en structure READ
+     */
     public int lastUpdatedWord = 0;
-    /** indice du dernier document index� mais pas encore en structure WRITE*/
+    /**
+     * indice du dernier document index� mais pas encore en structure WRITE
+     */
     public int lastRecordedDoc = 0;
-    /** indice du dernier document index�. en structure READ*/
+    /**
+     * indice du dernier document index�. en structure READ
+     */
     public int lastUpdatedDoc = 0;
-    /** indice du dernier document index� � classifier (pour une indexation en deux passes. */
+    /**
+     * indice du dernier document index� � classifier (pour une indexation en
+     * deux passes.
+     */
     public int nbdoctoclassify = 0;
-    /** nbre total de positions index�e*/
+    /**
+     * nbre total de positions index�e
+     */
     public long cntpos = 0;
-    /** flag indiquant qu'il n'y pas de document invalide (permet de sauter les filtres */
+    /**
+     * flag indiquant qu'il n'y pas de document invalide (permet de sauter les
+     * filtres
+     */
     public static boolean ZERO_INVALID_DOC = false;
-    /** correcteur ortografic */
+    /**
+     * correcteur ortografic
+     */
     public static OupsQuery oups;
-    /** marqueur pour les propri�t�s (langue, collection) */
+    /**
+     * marqueur pour les propri�t�s (langue, collection)
+     */
     public static MarkerManager marker;
-    /** une liste de documents  (pour QLTwice) attention cette impl�mentation ne supporte pas la concurrence.
-    Il s'agit d'un test pour la recherche*/
+    /**
+     * une liste de documents (pour QLTwice) attention cette impl�mentation ne
+     * supporte pas la concurrence. Il s'agit d'un test pour la recherche
+     */
     public static int[] resQ1;
 
-    /** Cr�e une structure d'indexation
+    /**
+     * Cr�e une structure d'indexation
      */
     public IdxStructure() {
     }
 
-    /** Cr�e une structure d'indexation . Permet de d�composer l'initalisation.
+    /**
+     * Cr�e une structure d'indexation . Permet de d�composer l'initalisation.
+     *
      * @param _mode (QUERY,INCREMENTAL,DIFFERENTIAL,)
      */
     public IdxStructure(String _mode) {
@@ -156,9 +230,11 @@ public class IdxStructure {
     }
 
     /**
-     * cr�ation d'une structure d'indexation. Permet de d�composer l'initalisation.
+     * cr�ation d'une structure d'indexation. Permet de d�composer
+     * l'initalisation.
+     *
      * @param _mode (NEW_INDEXATION)
-     * @param name  (pas utilis�)
+     * @param name (pas utilis�)
      *
      */
     public IdxStructure(String _mode, String name) {
@@ -168,7 +244,9 @@ public class IdxStructure {
         MODE_IDX = IdxMode.valueOf(_mode);
     }
 
-    /** Cr�e une structure d'indexation et initialise la.
+    /**
+     * Cr�e une structure d'indexation et initialise la.
+     *
      * @param _mode (NEW,QUERY,INCREMENTAL,DIFFERENTIAL,)
      * @param client la configuration client
      */
@@ -179,13 +257,17 @@ public class IdxStructure {
     }
 
     /* service IO */
-    /** ferme tout les managers (doc,term,objsto) pour lib�rer la m�moire pour le classifieur !
+    /**
+     * ferme tout les managers (doc,term,objsto) pour lib�rer la m�moire pour le
+     * classifieur !
      */
     public final void closeAllManager() {
         IO.closeAllManager();
     }
 
-    /** r�cu�re le vecteur de s�quence des termes d'un document
+    /**
+     * r�cu�re le vecteur de s�quence des termes d'un document
+     *
      * @param d document
      * @return s�quence
      */
@@ -193,14 +275,18 @@ public class IdxStructure {
         return IO.loadSeq(d);
     }
 
-    /** sauve un �l�ment du cache (uniquement pour le management des caches)
+    /**
+     * sauve un �l�ment du cache (uniquement pour le management des caches)
+     *
      * @param i indice du cache
      */
     public final void saveVectorW(int i) {
         IO.saveVectorW(i);
     }
 
-    /** r�cu�re le vecteur des positions des termes d'un document
+    /**
+     * r�cu�re le vecteur des positions des termes d'un document
+     *
      * @param d document
      * @return s�quence
      */
@@ -210,6 +296,7 @@ public class IdxStructure {
 
     /**
      * r�cu�re la liste des termes ayant le meme lemme
+     *
      * @return la liste des termes
      * @param w lemme recherch�
      */
@@ -221,7 +308,9 @@ public class IdxStructure {
         return res;
     }
 
-    /** r�cu�re le sac des termes d'un document
+    /**
+     * r�cu�re le sac des termes d'un document
+     *
      * @param d document
      * @return sac de termes
      */
@@ -229,13 +318,17 @@ public class IdxStructure {
         return IO.loadBag(d);
     }
 
-    /** charge un index.
+    /**
+     * charge un index.
      */
     public final void loadIndexDoc() {
         IO.loadindexdoc();
     }
 
-    /** Index le contenu du directoire en ne comptant que les mots sans enregistrer les documents.
+    /**
+     * Index le contenu du directoire en ne comptant que les mots sans
+     * enregistrer les documents.
+     *
      * @param path directoire � indexer
      */
     public final void indexdirOnlyCount(String path) {
@@ -253,7 +346,10 @@ public class IdxStructure {
         lastRecordedDoc = save_lastdoc;   // restore
     }
 
-    /** Index le contenu du directoire en ne comptant que les mots sans enregistrer les documents.
+    /**
+     * Index le contenu du directoire en ne comptant que les mots sans
+     * enregistrer les documents.
+     *
      * @param path directoire � indexer
      */
     public final void indexdirBuildDocBag(String path) {
@@ -265,14 +361,18 @@ public class IdxStructure {
         Indexer.indexdir(path);
     }
 
-    /** Index le contenu du directoire indiqu�.
+    /**
+     * Index le contenu du directoire indiqu�.
+     *
      * @param path directoire � indexer
      */
     public final void indexdir(String path) {
         Indexer.indexdir(path);
     }
 
-    /** Index ce contenu  avec cet identifiant.
+    /**
+     * Index ce contenu avec cet identifiant.
+     *
      * @param fname identifiant
      * @param content contenu � indexer
      */
@@ -288,8 +388,7 @@ public class IdxStructure {
     }
 
     /**
-     * permettre de voir l'index en entier
-     * doit �tre ex�cuter en mode exclusif
+     * permettre de voir l'index en entier doit �tre ex�cuter en mode exclusif
      */
     public final void showFullIndex() {
         indexCoord.freecacheFull();   // sauvegarder les donn�es encore dans les caches de l'index
@@ -313,28 +412,35 @@ public class IdxStructure {
 
     }
 
-    /** sauvegarder les donn�es encore dans les caches et ferme l'un index
+    /**
+     * sauvegarder les donn�es encore dans les caches et ferme l'un index
      */
     public final void close() {
         indexCoord.freecacheFull();
         IO.saveindexdoc();
     }
 
-    /** r�cup�re le nom de la racine de la structure d'indexation
+    /**
+     * r�cup�re le nom de la racine de la structure d'indexation
+     *
      * @return dossier racine
      */
     public final String getIdxRootName() {
         return COMMON_ROOT;
     }
 
-    /** r�cup�re le nom de l'index actuellement actif
+    /**
+     * r�cup�re le nom de l'index actuellement actif
+     *
      * @return sac nom de fichier
      */
     public final String getIdxName() {
         return IdxConstant.currentf;
     }
 
-    /** nombre de documents dans lesquels apparait le terme j
+    /**
+     * nombre de documents dans lesquels apparait le terme j
+     *
      * @param j i�me terme
      * @return nbr de documents
      */
@@ -342,8 +448,10 @@ public class IdxStructure {
         return IO.getOccOfW(j);
     }
 
-    /** nombre de documents dans lesquels apparait le terme w
-     * @param w  terme
+    /**
+     * nombre de documents dans lesquels apparait le terme w
+     *
+     * @param w terme
      * @return nbr de documents
      */
     public final int getOccOfW(String w) { // Count in how many documents word j appears
@@ -354,7 +462,9 @@ public class IdxStructure {
         return IO.getOccOfW(j);
     }
 
-    /** nombres d'occurence dans tous le corpus du terme j
+    /**
+     * nombres d'occurence dans tous le corpus du terme j
+     *
      * @param j i�me terme
      * @return nbr occurence
      */
@@ -371,8 +481,10 @@ public class IdxStructure {
         return nbocc;
     }
 
-    /** retourne le vecteur des positions du terme i pour le document n
-     * ! Doit-�tre utilis� sur un terme prot�g�
+    /**
+     * retourne le vecteur des positions du terme i pour le document n !
+     * Doit-�tre utilis� sur un terme prot�g�
+     *
      * @param i terme
      * @param n document
      * @return vecteur de positions
@@ -383,8 +495,10 @@ public class IdxStructure {
         return indexread.getvPos(i, indexread.vDoc(i, tl * VEC + n), indexread.vDoc(i, tl * OCC + n));
     }
 
-    /** retourne les bornes des positions du terme i pour le document n.
-     * ! Doit-�tre utilis� sur un terme prot�g�
+    /**
+     * retourne les bornes des positions du terme i pour le document n. !
+     * Doit-�tre utilis� sur un terme prot�g�
+     *
      * @param i terme
      * @param n document
      * @return vecteur de positions
@@ -395,21 +509,27 @@ public class IdxStructure {
         return new PosLength(indexread.vDoc(i, tl * VEC + n), indexread.vDoc(i, tl * OCC + n));
     }
 
-    /** charge le vecteur (utilis� uniquement par le gestionnaire de cache).
+    /**
+     * charge le vecteur (utilis� uniquement par le gestionnaire de cache).
+     *
      * @param n terme
      */
     public void loadVectorWforBasic(int n) {
         IO.loadVectorWforBasic(n);
     }
 
-    /** charge le vecteur (utilis� uniquement par le gestionnaire de cache).
+    /**
+     * charge le vecteur (utilis� uniquement par le gestionnaire de cache).
+     *
      * @param n terme
      */
     public void loadVectorWforFull(int n) {
         IO.loadVectorWforFull(n);
     }
 
-    /** longeur d'un document.
+    /**
+     * longeur d'un document.
+     *
      * @param d document
      * @return nbr de termes index�s
      */
@@ -417,7 +537,9 @@ public class IdxStructure {
         return docstable.getSize(d);
     }
 
-       /** date d'un document.
+    /**
+     * date d'un document.
+     *
      * @param d document
      * @return nbr de termes index�s
      */
@@ -425,7 +547,10 @@ public class IdxStructure {
         return docstable.getDate(d);
     }
 
-    /** indice d'un terme (le texte est normalis� Lower ...), les indices ne sont pris que dans l'intervalle de lecture
+    /**
+     * indice d'un terme (le texte est normalis� Lower ...), les indices ne sont
+     * pris que dans l'intervalle de lecture
+     *
      * @param w texte
      * @return indice du terme (-1 = pas trouv�)
      */
@@ -442,7 +567,10 @@ public class IdxStructure {
         }
     }
 
-    /** indice d'un terme (le terme est d�j� normalis�), les indices ne sont pris que dans l'intervalle de lecture
+    /**
+     * indice d'un terme (le terme est d�j� normalis�), les indices ne sont pris
+     * que dans l'intervalle de lecture
+     *
      * @param w texte
      * @return indice du terme (-1 = pas trouv�)
      */
@@ -457,7 +585,9 @@ public class IdxStructure {
         }
     }
 
-    /** nom du fichier du document i
+    /**
+     * nom du fichier du document i
+     *
      * @param d i�me document
      * @return nom de fichier
      */
@@ -465,7 +595,9 @@ public class IdxStructure {
         return docstable.get(d);
     }
 
-    /** num�ro du document ayant le libell� s
+    /**
+     * num�ro du document ayant le libell� s
+     *
      * @param s nom du fichier
      * @return num�ro du document (-1 = pas trouv�)
      */
@@ -473,7 +605,9 @@ public class IdxStructure {
         return docstable.get(s);
     }
 
-    /** nom du terme  i
+    /**
+     * nom du terme i
+     *
      * @return nom du terme
      * @param i i�me terme
      */
@@ -482,7 +616,8 @@ public class IdxStructure {
     }
 
     /**
-     *  r�cup�re le dictionnaire de propri�t�s
+     * r�cup�re le dictionnaire de propri�t�s
+     *
      * @return liste des propri�t�s actives
      */
     public List<String> getDictionnary() {
@@ -490,7 +625,9 @@ public class IdxStructure {
     }
 
     /**
-     *  r�cup�re le dictionnaire de propri�t�s ayant un certain pr�fix (COLECT., LANG.)
+     * r�cup�re le dictionnaire de propri�t�s ayant un certain pr�fix (COLECT.,
+     * LANG.)
+     *
      * @param prefix pr�fixe des propri�t�s
      * @return liste des propri�t�s actives
      */
@@ -499,7 +636,9 @@ public class IdxStructure {
     }
 
     /**
-     * retourne la liste des documents valides correspondants � la requ�te, (null) si erreur.
+     * retourne la liste des documents valides correspondants � la requ�te,
+     * (null) si erreur.
+     *
      * @param request requ�te
      * @return la liste des documents valides
      */
@@ -508,7 +647,9 @@ public class IdxStructure {
     }
 
     /**
-     * retourne la liste des documents valides correspondants � la requ�te, (null) si erreur.
+     * retourne la liste des documents valides correspondants � la requ�te,
+     * (null) si erreur.
+     *
      * @param request requ�te
      * @return la liste des documents valides
      */
@@ -518,6 +659,7 @@ public class IdxStructure {
 
     /**
      * v�rifie l'int�girit� d'un terme
+     *
      * @param verbose d�tail du check
      * @param w terme � v�rifier
      */
@@ -554,6 +696,7 @@ public class IdxStructure {
 
     /**
      * v�rifie l'int�girit� de tout l'index
+     *
      * @param verbose d�tail de la v�rification
      */
     public final void checkIntegrityOfRND(boolean verbose) {
@@ -566,6 +709,7 @@ public class IdxStructure {
 
     /**
      * initialise un lemmatiseur dans une langue donn�e
+     *
      * @param lang langue de stemming
      */
     public void initStemmer(String lang) {
@@ -576,6 +720,7 @@ public class IdxStructure {
 
     /**
      * indique si les caches d�passent la taille IDXSIZETOFREE & allocate
+     *
      * @return true=d�passe les capacit�s
      */
     public boolean cacheOverFlow() {
@@ -584,22 +729,22 @@ public class IdxStructure {
 
     /**
      * indique la taille total des caches
+     *
      * @return la taille
      */
     public long cacheCurrentSize() {
         return (indexdoc.getCurrentSize() + indexpos.getCurrentSize());
     }
 
-    
     /**
      * permet de browser le corpus indexé par les noms des documents
+     *
      * @return une hitlist de documents
-     */ 
-   public QLResultNice browseNice(String request, String langS, int start, int size, String[] collections, String order, boolean onlyOnFileName) {
+     */
+    public QLResultNice browseNice(String request, String langS, int start, int size, String[] collections, String order, boolean onlyOnFileName) {
         return browser.get(this, request, langS, start, size, collections, order, onlyOnFileName);
     }
 
-    
     public QLResultNice evalQLNice(ContentService cs, String request, int start, int size, boolean fullresult) {
         return executor.get(this, cs, request, start, size, fullresult);
     }
@@ -614,7 +759,7 @@ public class IdxStructure {
     }
 
     public QLResultNice evalQLNice(ContentService cs, String request, String properties, String profile, int start, int size, boolean fullresult) {
-        return executor.get(this, cs, request, properties, profile, start, size,fullresult);
+        return executor.get(this, cs, request, properties, profile, start, size, fullresult);
     }
 
     public REFResultNice getReferences(UploadedFile upfile, int limit, String source, String target, String[] selectedCollection) {
@@ -655,40 +800,43 @@ public class IdxStructure {
         }
     }
 
-    /**    
+    /**
      * retourne la liste du vocabulaire
+     *
      * @return chaque mot est sur une ligne
      */
     public StringBuilder getVocabulary() {
         Timer load = new Timer("load vocabulary for wildchar expansion");
         StringBuilder b = new StringBuilder();  // pour que wordExpander puisse retrouver le premier mot
-        msg("nb word:"+this.lastRecordedWord);
+        msg("nb word:" + this.lastRecordedWord);
         b.append(WildCharExpander.ITEM_START);
         for (int i = 0; i < this.lastRecordedWord; i++) {
-            b.append(getStringforW(i)+WildCharExpander.ITEM_STOP+WildCharExpander.ITEM_START);
+            b.append(getStringforW(i) + WildCharExpander.ITEM_STOP + WildCharExpander.ITEM_START);
         }
         load.stop();
         return b;
     }
 
-    /**    
+    /**
      * retourne la liste de tous les noms des documents
+     *
      * @return chaque mot est sur une ligne
      */
     public StringBuilder getCorpusDocNames() {
         Timer load = new Timer("load document list for wildchar expansion");
         StringBuilder b = new StringBuilder();  // pour que wordExpander puisse retrouver le premier mot
-        msg("nb docs:"+this.lastRecordedDoc);
-         b.append(WildCharExpander.ITEM_START);
-       for (int i = 0; i < this.lastRecordedDoc; i++) {
-            b.append(getFileNameForDocument(i)+WildCharExpander.ITEM_STOP+WildCharExpander.ITEM_START);
-      }
+        msg("nb docs:" + this.lastRecordedDoc);
+        b.append(WildCharExpander.ITEM_START);
+        for (int i = 0; i < this.lastRecordedDoc; i++) {
+            b.append(getFileNameForDocument(i) + WildCharExpander.ITEM_STOP + WildCharExpander.ITEM_START);
+        }
         load.stop();
         return b;
     }
-   
-    
-    /** tout les documents satisfaisants une propri�t�
+
+    /**
+     * tout les documents satisfaisants une propri�t�
+     *
      * @param properties nom de la propri�t�
      * @return set de bits
      */
@@ -696,7 +844,9 @@ public class IdxStructure {
         return docstable.satisfyThisProperty(properties);
     }
 
-    /** �limine tous les documents satisfaisants une propri�t�
+    /**
+     * �limine tous les documents satisfaisants une propri�t�
+     *
      * @param properties nom de la propri�t�
      */
     public void clearThisProperty(String properties) {
@@ -705,7 +855,9 @@ public class IdxStructure {
         }
     }
 
-    /** d�finir une  propri�t� pour un document
+    /**
+     * d�finir une propri�t� pour un document
+     *
      * @param docID identifiant
      * @param properties nom de la propri�t�
      */
@@ -714,7 +866,9 @@ public class IdxStructure {
 
     }
 
-    /** �liminer une  propri�t� pour un document
+    /**
+     * �liminer une propri�t� pour un document
+     *
      * @param docID identifiant
      * @param properties nom de la propri�t�
      */
@@ -858,6 +1012,17 @@ public class IdxStructure {
             }
         }
         indexCoord.startTimer(); // initial time for global statistic
- 
+
+    }
+
+    /**
+     * check if a expression is content in a document
+     */
+    public boolean isExactExpInDoc(String exactExpression, int docid, String fname) {
+        String content = file2String(fname, DOC_ENCODING);
+        if (content == null) {
+            return false;
+        }       
+        return content.contains(exactExpression);
     }
 }

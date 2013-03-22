@@ -314,8 +314,9 @@ public class Server_MyCat extends UnicastRemoteObject implements IndexService_My
         serverR.lock();
         try {
             if (exact) {
-              QLResultNice res = id.evalQLNice(cs, request, start, size,true);
+              QLResultNice res = id.evalQLNice(cs, request, start, Integer.MAX_VALUE, true); // pas de limite
                 res.orderBy(id, order);
+                res.checkExact(id, size);
                 return res;
             } else {  // fuzzy search
                 QLResultNice res = id.evalQLNice(cs, request, start, size,false);

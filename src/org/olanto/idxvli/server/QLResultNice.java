@@ -1,22 +1,24 @@
-/**********
-Copyright © 2010-2012 Olanto Foundation Geneva
-
-This file is part of myCAT.
-
-myCAT is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as
-published by the Free Software Foundation, either version 3 of
-the License, or (at your option) any later version.
-
-myCAT is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with myCAT.  If not, see <http://www.gnu.org/licenses/>.
-
- **********/
+/**
+ * ********
+ * Copyright © 2010-2012 Olanto Foundation Geneva
+ *
+ * This file is part of myCAT.
+ *
+ * myCAT is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * myCAT is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with myCAT. If not, see <http://www.gnu.org/licenses/>.
+ *
+ *********
+ */
 package org.olanto.idxvli.server;
 
 import org.olanto.util.Timer;
@@ -30,9 +32,9 @@ import org.olanto.idxvli.ql.OrderByName;
 import org.olanto.idxvli.ql.OrderResult;
 
 /**
- * Classe stockant les  résultats d'une requête avec titre et snipet.
- * 
- *<p>
+ * Classe stockant les résultats d'une requête avec titre et snipet.
+ *
+ * <p>
  *
  */
 public class QLResultNice implements Serializable {
@@ -41,10 +43,10 @@ public class QLResultNice implements Serializable {
     public int[] result;
     /* les partie du results */
     public String[] docname;
-    public long[] docdate;  // initialisé seulement en cas de tri ...
+    private long[] docdate;  // initialisé seulement en cas de tri ...
     public String[] title;
     public String[] clue;
-    /* la dur�e d'ex�cution */
+    /* la durée d'exécution */
     public long duration;  // en ms
     /* autour de la requête */
     public String[] termsOfQuery;
@@ -53,8 +55,16 @@ public class QLResultNice implements Serializable {
     public String properties;
     public String profile;
     public String alternative;
+    /*  exact filtering */
+    private long durationExactFiltering;  // en ms
+    private int lastexact;
+    private int countcheckfile;
+    private boolean[] exact;
+    private boolean exactDone;
 
-    /** crée un résultat
+    /**
+     * crée un résultat
+     *
      * @param result id des documents
      * @param duration dur�e
      */
@@ -72,7 +82,9 @@ public class QLResultNice implements Serializable {
         this.alternative = alternative;
     }
 
-    /** cr�e un r�sultat
+    /**
+     * crée un résultat
+     *
      * @param result id des documents
      * @param duration dur�e
      */
@@ -103,6 +115,87 @@ public class QLResultNice implements Serializable {
             return s.replace(term, "<b>" + term + "</b>");
         }
         return s;
+    }
+
+    public void checkExact(IdxStructure id, int size) {
+        if (!exactDone){ // dont do this many times !!
+          exactDone=true;  
+        
+        boolean verbose = true;
+        Timer time = new Timer(query, true);
+        if (verbose) {
+            System.out.println("check exact expression");
+        }
+        if (result.length == 0) {  // no result
+            if (verbose) {
+                System.out.println("check exact expression");
+            }
+            return;
+        }
+        String exactExpression = "";
+        int beg = query.indexOf("QUOTATION(\"");
+        int end = query.indexOf("\")");
+        if (end == -1 || beg == -1) {  // no result
+            System.out.println("Error: Quey is not QUOTATION(\"....\") no filtering for exact matching");
+            return;
+        }
+        exactExpression = query.substring(beg + 11, end);
+        if (verbose) {
+            System.out.println("Exact expression is \"" + exactExpression + "\"");
+        }
+        exact = new boolean[result.length];
+        for (int i = 0; i < result.length; i++) {
+            countcheckfile++;
+            if (id.isExactExpInDoc(exactExpression, result[i], docname[i])) {
+              //  System.out.println("\"" + exactExpression + "\" is in " + docname[i]);
+                exact[i] = true; // mark ok
+                lastexact++;
+            } else {
+              //  System.out.println(exactExpression + "\" is not in " + docname[i]);
+           }
+            if (lastexact == size) {// enough results
+                break;
+            }
+        }
+
+        // compress result
+       if (verbose) {
+            System.out.println("countcheckfile: " + countcheckfile);
+            System.out.println("countexact: " + lastexact);
+        }
+
+        int[] exactResult = new int[lastexact];
+        String[] exactDocname = new String[lastexact];
+        String[] exactTitle = new String[lastexact];
+        String[] exactClue = new String[lastexact];
+        if (lastexact != 0) {// exist exact to be copied
+            int current = 0;
+            for (int i = 0; i < countcheckfile; i++) {
+                if (exact[i]) {
+                   // System.out.println("i: " + i+", current: " + current);
+                    exactResult[current] = result[i];
+                    exactDocname[current] = docname[i];
+                    exactTitle[current] = title[i];
+                    exactClue[current] = clue[i];
+                    current++;
+                }
+                
+            }
+        }
+        // replace fuzzy result by exact result
+        result = exactResult;
+        docname = exactDocname;
+        title = exactTitle;
+        clue = exactClue;
+        
+        // finish
+        
+        durationExactFiltering = time.getstop();
+        if (verbose) {
+            System.out.println("duration of check exact expression: " + durationExactFiltering + " (ms)");
+        }
+        }
+
     }
 
     public void orderBy(IdxStructure id, String kind) {
@@ -149,13 +242,14 @@ public class QLResultNice implements Serializable {
             }
             return;
         }
-     // by ranking nothing to do
-              for (int i = 0; i < result.length; i++) { 
-                  //System.out.println("orderByRanking: " + result[i] + " / " + docname[i]);
-            }
+        // by ranking nothing to do
+        for (int i = 0; i < result.length; i++) {
+            //System.out.println("orderByRanking: " + result[i] + " / " + docname[i]);
+        }
     }
 
-    public void update(IdxStructure id, ContentService cs, String request, int start, int size) { // pour le search engine
+    public void update(IdxStructure id, ContentService cs, String request, int start, int size, boolean fullresult) { // pour le search engine
+        if(!fullresult){
         boolean contentservice = cs != null;
         Timer time = new Timer(request, true);
         if (result == null) {// rien � faire
@@ -193,6 +287,7 @@ public class QLResultNice implements Serializable {
                 hilite(i);
                 this.duration = time.getstop(); //update time
             }
+        }
         }
     }
 

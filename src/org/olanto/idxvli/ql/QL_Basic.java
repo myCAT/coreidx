@@ -78,14 +78,14 @@ public class QL_Basic implements QLManager {
             initCache();
         }  // premier appel
 
-        String idOfQuery = request + "-" + properties + "-" + profile;
+        String idOfQuery = request + "-" + properties + "-" + profile+"-" +fullresult;
         msg("idOfQuery:" + idOfQuery);
         QLResultNice nice = getFromCache(idOfQuery);
 
         if (nice != null) { // dans le cache
 
             getInCache++;
-            nice.update(id, cs, request, start, size);  // met � jour la fen�tre
+            nice.update(id, cs, request, start, size,fullresult);  // met à jour la fenêtre
 
         } else { // pas dans le cache
 
@@ -111,7 +111,7 @@ public class QL_Basic implements QLManager {
         if (nice != null) { // dans le cache
 
             getInCache++;
-            nice.update(id, cs, request1, start, size2);  // met � jour la fen�tre
+            nice.update(id, cs, request1, start, size2,false);  // met � jour la fen�tre
 
         } else { // pas dans le cache
 
