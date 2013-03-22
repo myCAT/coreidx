@@ -293,6 +293,19 @@ public class QLCompiler {
         }
         return res;
     }
+   /**
+     * Calcule la requte sur le corpus index^é.
+     * @return une liste de numéro de documents
+     */
+    public final int[] executefull() {
+        int[] res = query().doc;
+//        msg("final result:");
+//        showVector(res);
+      if (sym.ttype != TT_EOF) {
+            msg("truncated parsing at :" + sym.sval + "-" + sym.ttype);
+        } // il reste encore des caract�res
+      return res;
+    }
 
     public String[] getTermsOfQuery() {
         if (termsOfQuery == null) {

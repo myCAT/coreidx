@@ -232,7 +232,7 @@ public class IndexService_BASIC extends UnicastRemoteObject implements IndexServ
     public QLResultNice evalQLNice(String request, int start, int size) throws RemoteException {
         serverR.lock();
         try {
-            return id.evalQLNice(cs, request, start, size);
+            return id.evalQLNice(cs, request, start, size,false);
 
         } finally {
             serverR.unlock();
@@ -252,7 +252,7 @@ public class IndexService_BASIC extends UnicastRemoteObject implements IndexServ
     public QLResultNice evalQLNice(String request, String properties, String profile, int start, int size) throws RemoteException {
         serverR.lock();
         try {
-            return id.evalQLNice(cs, request, properties, profile, start, size);
+            return id.evalQLNice(cs, request, properties, profile, start, size,false);
 
         } finally {
             serverR.unlock();

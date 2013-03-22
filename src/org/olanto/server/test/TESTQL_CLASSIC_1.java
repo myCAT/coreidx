@@ -106,7 +106,7 @@ public class TESTQL_CLASSIC_1 {
         TimerNano t1 = new TimerNano("parse:" + s, false);
         int start = 0;
         int size = 5;
-        QLResultNice nice = id.evalQLNice(null, s, start, size);
+        QLResultNice nice = id.evalQLNice(null, s, start, size,false);
         t1.stop(false);
         if (nice.result.length == 0) {
             msg("result is null");
@@ -125,7 +125,7 @@ public class TESTQL_CLASSIC_1 {
         TimerNano t1 = new TimerNano("parse:" + s, false);
         int start = 5;
         int size = 5;
-        QLResultNice nice = id.evalQLNice(null, s, start, size);
+        QLResultNice nice = id.evalQLNice(null, s, start, size,false);
         t1.stop(false);
         if (nice.result.length == 0) {
             msg("result is null");

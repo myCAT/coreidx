@@ -45,11 +45,11 @@ public interface QLManager {
     
     public QLResultAndRank getMore(String request, IdxStructure id);
 
-    public QLResultNice get(IdxStructure id, ContentService cs, String request, int start, int size);
+    public QLResultNice get(IdxStructure id, ContentService cs, String request, int start, int size, boolean fullresult);
 
     public QLResultNice get(IdxStructure id, ContentService cs, String request1, String request2, int start, int size1, int size2);
 
     public QLResultNice get(IdxStructure id, ContentService cs, String request, String properties, int start, int size);
 
-    public QLResultNice get(IdxStructure id, ContentService cs, String request, String properties, String profile, int start, int size);
+    public QLResultNice get(IdxStructure id, ContentService cs, String request, String properties, String profile, int start, int size, boolean fullresult);
 }

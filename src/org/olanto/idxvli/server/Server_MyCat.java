@@ -299,7 +299,7 @@ public class Server_MyCat extends UnicastRemoteObject implements IndexService_My
     public QLResultNice evalQLNice(String request, int start, int size) throws RemoteException {
         serverR.lock();
         try {
-            return id.evalQLNice(cs, request, start, size);
+            return id.evalQLNice(cs, request, start, size,false);
 
         } finally {
             serverR.unlock();
@@ -313,10 +313,15 @@ public class Server_MyCat extends UnicastRemoteObject implements IndexService_My
     public QLResultNice evalQLNice(String request, int start, int size, String order, boolean exact, boolean orderbyocc) throws RemoteException {
         serverR.lock();
         try {
-            QLResultNice res = id.evalQLNice(cs, request, start, size);
-            res.orderBy(id, order);
-            return res;
-
+            if (exact) {
+              QLResultNice res = id.evalQLNice(cs, request, start, size,true);
+                res.orderBy(id, order);
+                return res;
+            } else {  // fuzzy search
+                QLResultNice res = id.evalQLNice(cs, request, start, size,false);
+                res.orderBy(id, order);
+                return res;
+            }
         } finally {
             serverR.unlock();
         }

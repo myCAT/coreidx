@@ -600,8 +600,8 @@ public class IdxStructure {
     }
 
     
-    public QLResultNice evalQLNice(ContentService cs, String request, int start, int size) {
-        return executor.get(this, cs, request, start, size);
+    public QLResultNice evalQLNice(ContentService cs, String request, int start, int size, boolean fullresult) {
+        return executor.get(this, cs, request, start, size, fullresult);
     }
 
     public QLResultNice evalQLNice(ContentService cs, String request1,
@@ -613,8 +613,8 @@ public class IdxStructure {
         return executor.get(this, cs, request, properties, start, size);
     }
 
-    public QLResultNice evalQLNice(ContentService cs, String request, String properties, String profile, int start, int size) {
-        return executor.get(this, cs, request, properties, profile, start, size);
+    public QLResultNice evalQLNice(ContentService cs, String request, String properties, String profile, int start, int size, boolean fullresult) {
+        return executor.get(this, cs, request, properties, profile, start, size,fullresult);
     }
 
     public REFResultNice getReferences(UploadedFile upfile, int limit, String source, String target, String[] selectedCollection) {

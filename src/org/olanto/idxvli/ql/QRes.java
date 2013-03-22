@@ -34,11 +34,11 @@ import org.olanto.idxvli.util.SetOperation;
  */
 public class QRes {
 
-    /* les documents r�sultats */
+    /* les documents résultats */
     public int[] doc;
     /* le degr� de pertinence du r�sultat */
     public float[] rank;
-    /* les documents r�sultats tri�s*/
+    /* les documents résultats triés*/
     public int[] topdoc;
     /* le degr� de pertinence du r�sultat tri�s*/
     public float[] toprank;
