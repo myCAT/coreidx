@@ -1,23 +1,24 @@
-/**********
-    Copyright © 2010-2012 Olanto Foundation Geneva
-
-   This file is part of myCAT.
-
-   myCAT is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as
-    published by the Free Software Foundation, either version 3 of
-    the License, or (at your option) any later version.
-
-    myCAT is distributed in the hope that it will be useful, but
-    WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See the GNU Affero General Public License for more details.
-
-    You should have received a copy of the GNU Affero General Public License
-    along with myCAT.  If not, see <http://www.gnu.org/licenses/>.
-
-**********/
-
+/**
+ * ********
+ * Copyright © 2010-2012 Olanto Foundation Geneva
+ *
+ * This file is part of myCAT.
+ *
+ * myCAT is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * myCAT is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with myCAT. If not, see <http://www.gnu.org/licenses/>.
+ *
+ *********
+ */
 package org.olanto.idxvli.util;
 
 import java.io.*;
@@ -26,18 +27,24 @@ import static org.olanto.util.Messages.*;
 
 /**
  * Classe g�rant des op�rations courante (fichiers, copie, compression, etc).
- * 
+ *
  *
  *
  * Classe g�rant des op�rations courante (fichiers, copie, compression, etc).
  */
 public class BytesAndFiles {
 
-    /** valeur OK */
+    /**
+     * valeur OK
+     */
     public static final int STATUS_OK = 0;
-    /** valeur ERREUR */
+    /**
+     * valeur ERREUR
+     */
     public static final int STATUS_ERROR = -1;
-    /** valeur SIMULATION */
+    /**
+     * valeur SIMULATION
+     */
     public static final int STATUS_SIMULATION = -2;
     private static final boolean nowrapboolean = true;  // no wrap pour le ZIP
     private static Deflater def = new Deflater(Deflater.DEFAULT_COMPRESSION, nowrapboolean);
@@ -47,35 +54,44 @@ public class BytesAndFiles {
 
     /**
      * lit le contenu d'un fichier texte encod�
+     *
      * @param fname nom du fichier
      * @param txt_encoding encodage
      * @return le contenu du fichier
      */
     public static final String file2String(String fname, String txt_encoding) {
-        StringBuffer txt = new StringBuffer("");
-        try {
-            InputStreamReader isr = new InputStreamReader(new FileInputStream(fname), txt_encoding);
-            BufferedReader in = new BufferedReader(isr);
-            String w = in.readLine();
-            while (w != null) {
-                txt.append(w);
-                txt.append("\n");
-                w = in.readLine();
+        File f = new File(fname);
+        if (f.exists()) {
+            StringBuffer txt = new StringBuffer("");
+            try {
+                InputStreamReader isr = new InputStreamReader(new FileInputStream(fname), txt_encoding);
+                BufferedReader in = new BufferedReader(isr);
+                String w = in.readLine();
+                while (w != null) {
+                    txt.append(w);
+                    txt.append("\n");
+                    w = in.readLine();
+                }
+                return txt.toString();
+            } catch (Exception e) {
+                error("file2String", e);
+                return null;
             }
-            return txt.toString();
-        } catch (Exception e) {
-            error("file2String", e);
+        } else {
             return null;
         }
-
     }
 
     /**
-     *  stocke w encod� � la position pos du fichier r (si n'exc�de pas maxLengthString) et retourne 0 si ok sinon <0
+     * stocke w encod� � la position pos du fichier r (si n'exc�de pas
+     * maxLengthString) et retourne 0 si ok sinon <0
+     *
+
+     *
      * @param w cha�ne � �crire
      * @param pos position
      * @param encode encodage
-     * @param maxLengthString  longueur max du string converti en bytes
+     * @param maxLengthString longueur max du string converti en bytes
      * @param r fichier
      * @return status
      */
@@ -102,7 +118,8 @@ public class BytesAndFiles {
     }
 
     /**
-     *  lit w � la position pos du fichier r
+     * lit w � la position pos du fichier r
+     *
      * @param pos position
      * @param encode encodage
      * @param r fichier
@@ -123,7 +140,10 @@ public class BytesAndFiles {
     }
 
     /**
-     *  stocke n � cette position et retourne 0 si ok sinon <0
+     * stocke n � cette position et retourne 0 si ok sinon <0
+     *
+
+     *
      * @param n entier � �crire
      * @param pos position
      * @param r fichier
@@ -139,8 +159,10 @@ public class BytesAndFiles {
     }
 
     /**
-     *  stock sur le disk ces bytes � cette position
-     * retourne 0 si ok sinon <0
+     * stock sur le disk ces bytes � cette position retourne 0 si ok sinon <0
+     *
+
+     *
      * @param b byte � �crire
      * @param pos position
      * @param r fichier
@@ -162,8 +184,9 @@ public class BytesAndFiles {
     }
 
     /**
-     *  read int � la position pos
-     *   il est �vident que le status ne peut �tre test� si on travaille avec -1 !!!
+     * read int � la position pos il est �vident que le status ne peut �tre
+     * test� si on travaille avec -1 !!!
+     *
      * @param pos position
      * @param r fichier
      * @return valeur
@@ -184,8 +207,8 @@ public class BytesAndFiles {
     }
 
     /**
-     *  lire n bytes � cette position
-     * retourne le vecteur si ok sinon null
+     * lire n bytes � cette position retourne le vecteur si ok sinon null
+     *
      * @param n nombres de bytes � lire
      * @param pos position
      * @param r fichier
@@ -218,7 +241,8 @@ public class BytesAndFiles {
     }
 
     /**
-     *  converti de byte en String avec un encodage 'UTF-8' par exemple
+     * converti de byte en String avec un encodage 'UTF-8' par exemple
+     *
      * @param bs bytes � convertir
      * @param encode encodage
      * @return valeur convertie
@@ -236,7 +260,8 @@ public class BytesAndFiles {
     }
 
     /**
-     *  converti de String en byte avec un encodage 'UTF-8' par exemple
+     * converti de String en byte avec un encodage 'UTF-8' par exemple
+     *
      * @param s cha�ne � convertir
      * @param encode encodage
      * @return bytes
@@ -253,7 +278,9 @@ public class BytesAndFiles {
         return null;
     }
 
-    /** copier le vecteur d'entiers dans un  vecteur de bytes.
+    /**
+     * copier le vecteur d'entiers dans un vecteur de bytes.
+     *
      * @param v vecteur d'entier
      * @param lb longeur de copie en byte (*4)
      * @param b vecteur de bytes
@@ -275,7 +302,9 @@ public class BytesAndFiles {
         }
     }
 
-    /** copier le vecteur de bytes dans un vecteur d'entiers.
+    /**
+     * copier le vecteur de bytes dans un vecteur d'entiers.
+     *
      * @param v vecteur d'entier
      * @param lb longeur de copie en byte (*4)
      * @param b vecteur de bytes
@@ -297,8 +326,10 @@ public class BytesAndFiles {
         }
     }
 
-    /** incr�mente la taille d'un vecteur et recopie la totalit� si plus grand,
+    /**
+     * incr�mente la taille d'un vecteur et recopie la totalit� si plus grand,
      * si l'incr�ment est n�gatif seul les n premiers bytes sont copi�s
+     *
      * @param v vecteur d'entier
      * @param increment +ajout/-troncation
      * @return nouveau vecteur
@@ -316,9 +347,11 @@ public class BytesAndFiles {
         return it;
     }
 
-    /** copier le vecteur p dans un nouveau vecteur de longueur l.
-     * Si p est plus petit que l alors la fin sera remplie de z�ro.
-     * Si p est plus grand alors la fin de p sera tronqu�e.
+    /**
+     * copier le vecteur p dans un nouveau vecteur de longueur l. Si p est plus
+     * petit que l alors la fin sera remplie de z�ro. Si p est plus grand alors
+     * la fin de p sera tronqu�e.
+     *
      * @param p vecteur
      * @param l longueur du nouveau vecteur
      * @return nouveau vecteur
@@ -331,9 +364,11 @@ public class BytesAndFiles {
         return r;
     }
 
-    /** copier le vecteur p dans un nouveau vecteur de longueur l.
-     * Si p est plus petit que l alors la fin sera remplie de z�ro.
-     * Si p est plus grand alors la fin de p sera tronqu�e.
+    /**
+     * copier le vecteur p dans un nouveau vecteur de longueur l. Si p est plus
+     * petit que l alors la fin sera remplie de z�ro. Si p est plus grand alors
+     * la fin de p sera tronqu�e.
+     *
      * @param p vecteur
      * @param l longueur du nouveau vecteur
      * @return nouveau vecteur
@@ -346,9 +381,11 @@ public class BytesAndFiles {
         return r;
     }
 
-    /** copier le vecteur p dans un nouveau vecteur de longueur l.
-     * Si p est plus petit que l alors la fin sera remplie de z�ro.
-     * Si p est plus grand alors la fin de p sera tronqu�e.
+    /**
+     * copier le vecteur p dans un nouveau vecteur de longueur l. Si p est plus
+     * petit que l alors la fin sera remplie de z�ro. Si p est plus grand alors
+     * la fin de p sera tronqu�e.
+     *
      * @param p vecteur
      * @param l longueur du nouveau vecteur
      * @return nouveau vecteur
@@ -361,7 +398,9 @@ public class BytesAndFiles {
         return r;
     }
 
-    /** compresser un int[], genre ZIP
+    /**
+     * compresser un int[], genre ZIP
+     *
      * @param bi le vecteur a compresser
      * @return le vecteur de byte compress�
      */
@@ -382,7 +421,9 @@ public class BytesAndFiles {
         return copyVector(compresslength, bytecomp);
     }
 
-    /** compresser un byte[], genre ZIP
+    /**
+     * compresser un byte[], genre ZIP
+     *
      * @param bb le vecteur a compresser
      * @return le vecteur de byte compress�
      */
@@ -401,7 +442,9 @@ public class BytesAndFiles {
         return copyVector(compresslength, bytecomp);
     }
 
-    /** compresser un int[] Variable Int
+    /**
+     * compresser un int[] Variable Int
+     *
      * @param bi le vecteur a compresser
      * @return le vecteur de byte compress�
      */
@@ -426,7 +469,9 @@ public class BytesAndFiles {
         return r;
     }
 
-    /** d�compresser un int[] Variable Int
+    /**
+     * d�compresser un int[] Variable Int
+     *
      * @param bb le vecteur a d�compresser
      * @param maxSize la taille maximum du vecteur attendu
      * @return le vecteur de int d�compress�
@@ -453,7 +498,9 @@ public class BytesAndFiles {
         return bi;
     }
 
-    /** compresser un int[] Variable Int
+    /**
+     * compresser un int[] Variable Int
+     *
      * @param bi le vecteur a compresser
      * @return le vecteur de byte compress�
      */
@@ -478,7 +525,9 @@ public class BytesAndFiles {
         return r;
     }
 
-    /** d�compresser un byte[]
+    /**
+     * d�compresser un byte[]
+     *
      * @param bb le vecteur a d�compresser
      * @param maxSize la taille maximum du vecteur attendu
      * @return le vecteur de int d�compress�
@@ -502,7 +551,9 @@ public class BytesAndFiles {
         return bi;
     }
 
-    /** d�compresser un byte[]
+    /**
+     * d�compresser un byte[]
+     *
      * @param bb le vecteur a d�compresser
      * @param realSize la taille maximum du vecteur attendu
      * @return le vecteur de int d�compress�
@@ -524,6 +575,7 @@ public class BytesAndFiles {
 
     /**
      * indique la m�moire utilis�e par l'indexeur
+     *
      * @return la m�moire utilis�e
      */
     public static long usedMemory() {
@@ -534,6 +586,7 @@ public class BytesAndFiles {
 
     /**
      * affiche la m�moire utilis�e par l'indexeur
+     *
      * @param s libell� de l'affichage
      */
     public static void usedMemory(String s) {
@@ -543,7 +596,8 @@ public class BytesAndFiles {
     }
 
     /**
-     * Compacte la m�moire et affiche la m�moire utilis�e par l'indexeur 
+     * Compacte la m�moire et affiche la m�moire utilis�e par l'indexeur
+     *
      * @param s libell� de l'affichage
      */
     public static void compactMemory(String s) {
