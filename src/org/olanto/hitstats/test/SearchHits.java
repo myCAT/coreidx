@@ -1,6 +1,23 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * ********
+ * Copyright © 2010-2012 Olanto Foundation Geneva
+ *
+ * This file is part of myCAT.
+ *
+ * myCAT is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * myCAT is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with myCAT. If not, see <http://www.gnu.org/licenses/>.
+ *
+ *********
  */
 package org.olanto.hitstats.test;
 
@@ -17,7 +34,7 @@ import org.olanto.idxvli.server.IndexService_MyCat;
 
 /**
  *
- * @author simple
+ * count hits
  */
 public class SearchHits {
 
@@ -27,72 +44,79 @@ public class SearchHits {
     public Utility utils = new Utility();
     public float reFactor = 1.7f;
     public int minRefLn = 20;
+    static ArrayList<String> stopWords;
 
     public SearchHits() {
+        stopWords = getStopWords();
     }
 
     public void getRefWordsPos(String fileNameIn, String expression) throws FileNotFoundException {
+        boolean verbose = false;
+        boolean notask = false; // to test read load
         FileInputStream in = new FileInputStream(fileNameIn);
         String content = "";
         content += UtilsFiles.file2String(in, "UTF-8").toLowerCase();
-        int queryLn = expression.length();
+        if (!notask) {
+            int queryLn = expression.length();
 
-        ArrayList<String> query = utils.getQueryWords(expression, getStopWords());
-        System.out.println("list of words to look for : " + query.toString());
+            ArrayList<String> query = utils.getQueryWords(expression, stopWords);
+            if (verbose) {
+                System.out.println("list of words to look for : " + query.toString());
+            }
 
-        String regex;
-        int refLength = (int) (((reFactor * queryLn) > minRefLn) ? (reFactor * queryLn) : minRefLn);
+            String regex;
+            int refLength = (int) (((reFactor * queryLn) > minRefLn) ? (reFactor * queryLn) : minRefLn);
 //        System.out.println("refLength: " + refLength);
 
-        ArrayList<String> Pos = new ArrayList<String>();
-        ArrayList<Integer> startPos = new ArrayList<Integer>();
-        ArrayList<Integer> lastPos = new ArrayList<Integer>();
-        String first, res, last;
-        Pattern p;
-        Matcher m;
-        startPos.clear();
-        lastPos.clear();
+            ArrayList<String> Pos = new ArrayList<String>();
+            ArrayList<Integer> startPos = new ArrayList<Integer>();
+            ArrayList<Integer> lastPos = new ArrayList<Integer>();
+            String first, res, last;
+            Pattern p;
+            Matcher m;
+            startPos.clear();
+            lastPos.clear();
 
-        first = query.get(0);
-        last = query.get(query.size() - 1);
-        regex = REGEX_BEFORE_TOKEN + first + REGEX_AFTER_TOKEN;
-        p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        m = p.matcher(content);
-        if (m.find()) {
+            first = query.get(0);
+            last = query.get(query.size() - 1);
+            regex = REGEX_BEFORE_TOKEN + first + REGEX_AFTER_TOKEN;
+            p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+            m = p.matcher(content);
+            if (m.find()) {
 //            System.out.println("start found at : " + m.start());
-            startPos.add(m.start());
-            while (m.find()) {
                 startPos.add(m.start());
+                while (m.find()) {
+                    startPos.add(m.start());
 //                System.out.println("Start found at : " + m.start());
+                }
             }
-        }
-        regex = REGEX_BEFORE_TOKEN + last + REGEX_AFTER_TOKEN;
-        p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        m = p.matcher(content);
-        if (m.find()) {
+            regex = REGEX_BEFORE_TOKEN + last + REGEX_AFTER_TOKEN;
+            p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+            m = p.matcher(content);
+            if (m.find()) {
 //            System.out.println("last found at : " + m.start());
-            lastPos.add(m.start() + last.length());
-            while (m.find()) {
                 lastPos.add(m.start() + last.length());
+                while (m.find()) {
+                    lastPos.add(m.start() + last.length());
 //                System.out.println("last found at : " + m.start());
+                }
             }
-        }
-        int startp, lastp;
-        for (int s = 0; s < startPos.size(); s++) {
-            startp = startPos.get(s);
-            for (int l = 0; l < lastPos.size(); l++) {
-                lastp = lastPos.get(l);
-                if (((lastp - startp) >= (queryLn / 2)) && ((lastp - startp) <= refLength)) {
+            int startp, lastp;
+            for (int s = 0; s < startPos.size(); s++) {
+                startp = startPos.get(s);
+                for (int l = 0; l < lastPos.size(); l++) {
+                    lastp = lastPos.get(l);
+                    if (((lastp - startp) >= (queryLn / 2)) && ((lastp - startp) <= refLength)) {
 //                   System.out.println("Found a potential gap, checking if it contains all words");
-                    if (getAllWords(content.substring(startp, lastp + 1), query)) {
-                        res = startp + "¦" + (lastp - startp);
-                        Pos.add(res);
+                        if (getAllWords(content.substring(startp, lastp + 1), query)) {
+                            res = startp + "¦" + (lastp - startp);
+                            Pos.add(res);
+                        }
                     }
                 }
             }
+            getPositionsRef(Pos);
         }
-        getPositionsRef(Pos);
-
 //        for (int i = 0; i < Pos.size(); i++) {
 //            System.out.println("Positions found in Line: " + Pos.get(i));
 //        }
@@ -117,6 +141,7 @@ public class SearchHits {
     }
 
     private void getPositionsRef(ArrayList<String> Pos) {
+        boolean verbose = false;
         int[][] posit;
         int i, k, l, r;
         String curr;
@@ -136,7 +161,9 @@ public class SearchHits {
                     posit[s][1] = r + 1;
                 }
             }
-            System.out.println("Number of Occurrences = " + posit.length);
+            if (verbose) {
+                System.out.println("Number of Occurrences = " + posit.length);
+            }
 //            for (int ls = 0; ls < posit.length; ls++) {
 //                System.out.println("Starts at: " + posit[ls][0] + " Length: " + posit[ls][1]);
 //            }
