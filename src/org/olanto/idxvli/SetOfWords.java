@@ -47,6 +47,7 @@ public class SetOfWords {
             String w = in.readLine();
             while (w != null) {
                 //System.out.println("dont index:"+w);
+                w=w.trim(); // to clean some space
                 words.put(w, count);
                 w = in.readLine();
             }
