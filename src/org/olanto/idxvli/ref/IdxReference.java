@@ -120,7 +120,7 @@ public class IdxReference {
         textforhtml = addSpace(textforhtml);
         {  // calculer la longueur en mot séparé par des blancs
             String[] words = textforhtml.split("[\\s]");
-            totwordspacesep = words.length-3; // -3  pour ajuster avec les différentes marques ajoutées
+            totwordspacesep = words.length - 3; // -3  pour ajuster avec les différentes marques ajoutées
         }
         DoParse a = new DoParse(new StringReader(textforhtml), glue.dontIndexThis);
         a.scanString(glue, this);
@@ -301,8 +301,16 @@ public class IdxReference {
         s.append("<title>myQuote</title>");
         s.append("</head>\n");
         s.append("<body>\n");
+        if (MYQUOTE_STAT) {
+            s.append("<A NAME=\"TOP\">" + "</A>"
+                    + "<A HREF=\"#STATISTIC\">" + MSG.get("server.qd.MSG_19") + "</A>"
+                    + "<br/>");
+        }
         s.append(getXML());
         if (MYQUOTE_STAT) {
+            s.append("<A NAME=\"STATISTIC\">" + "</A>"
+                    + "<A HREF=\"#TOP\">" + MSG.get("server.qd.MSG_18") + "</A>"
+                    + "<br/>");
             s.append(getSTAT());
             s.append(getREF());
         }
@@ -398,6 +406,7 @@ public class IdxReference {
         } // if
         s.append("</P>\n");
         //timing.stop();
+        if (SKIP_LINE_QUOTE_DECTECTOR) return s.toString().replace("\n", "<br/><br/>");
         return s.toString().replace("\n", "<br/>");
     }
 

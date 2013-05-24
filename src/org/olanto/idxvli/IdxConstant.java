@@ -235,6 +235,7 @@ public class IdxConstant {
     public static boolean DOCNAME_BROWSE_INSENSITIVE = true;
     /*************************************************************************************/
     /** ajoute les statisques dans myQuote  */
+    public static boolean SKIP_LINE_QUOTE_DECTECTOR= false;
     public static boolean MYQUOTE_STAT = true;
     public static String OPEN_REF_BEG = "[R";
     public static String OPEN_REF_END = "]";
