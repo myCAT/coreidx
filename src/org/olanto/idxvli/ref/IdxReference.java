@@ -385,7 +385,7 @@ public class IdxReference {
                     if (openRef > 1) {
                         s.append("</a>");
                     }
-                    s.append("<a href=\"#").append(countrefstart).append("\" onClick=\"return gwtnav(this);\">").append(targetTxt);
+                    s.append("<a href=\"#").append(countrefstart).append("\" id=\"ref").append(countrefstart).append("\" onClick=\"return gwtnav(this);\">").append(targetTxt);
                 } //if
             } //if
             String addtohtml;
