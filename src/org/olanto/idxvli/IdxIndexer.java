@@ -1,23 +1,24 @@
-/**********
-    Copyright © 2010-2012 Olanto Foundation Geneva
-
-   This file is part of myCAT.
-
-   myCAT is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as
-    published by the Free Software Foundation, either version 3 of
-    the License, or (at your option) any later version.
-
-    myCAT is distributed in the hope that it will be useful, but
-    WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See the GNU Affero General Public License for more details.
-
-    You should have received a copy of the GNU Affero General Public License
-    along with myCAT.  If not, see <http://www.gnu.org/licenses/>.
-
-**********/
-
+/**
+ * ********
+ * Copyright © 2010-2012 Olanto Foundation Geneva
+ *
+ * This file is part of myCAT.
+ *
+ * myCAT is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * myCAT is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with myCAT. If not, see <http://www.gnu.org/licenses/>.
+ *
+ *********
+ */
 package org.olanto.idxvli;
 
 import java.io.*;
@@ -29,27 +30,36 @@ import org.olanto.idxvli.cache.*;
 import org.olanto.idxvli.extra.DocBag;
 import org.olanto.idxvli.extra.DocSeq;
 import org.olanto.idxvli.extra.DocPosChar;
+import org.olanto.idxvli.util.BytesAndFiles;
 
 /**
  * Une classe pour effectuer l'indexation des documents.
  *
- * 
+ *
  *
  */
 class IdxIndexer {
 
-    /** indice du dernier caractï¿½re lu dans le mfl*/
+    /**
+     * indice du dernier caractï¿½re lu dans le mfl
+     */
     private long lastposinmfl = 0;
     /* variables pour mesurer la performance de l'indexeur */
     private static int nbstat1 = 0;
-    /** Timer interne pour des mesures de performance */
+    /**
+     * Timer interne pour des mesures de performance
+     */
     private static long timer1;
-    /**frï¿½quence de la mesure du timer1 actuellement 10000 mots en n ms*/
+    /**
+     * frï¿½quence de la mesure du timer1 actuellement 10000 mots en n ms
+     */
     private static final int nbstatidx = 1000000;
     IdxStructure glue;
 
-    /** crï¿½e une instance d'indexation. Cette instance est associï¿½e
-     * ï¿½ la structure racine
+    /**
+     * crï¿½e une instance d'indexation. Cette instance est associï¿½e ï¿½ la
+     * structure racine
+     *
      * @param id structure racine
      */
     protected IdxIndexer(IdxStructure id) { // empty constructor
@@ -57,7 +67,10 @@ class IdxIndexer {
         glue = id;
     }
 
-    /** indexe tous les documents se trouvant dans le directoire (inclus ceux des sous-dossiers)
+    /**
+     * indexe tous les documents se trouvant dans le directoire (inclus ceux des
+     * sous-dossiers)
+     *
      * @param path directoire ï¿½ indexer
      */
     protected final void indexdir(String path) {
@@ -93,6 +106,12 @@ class IdxIndexer {
 
     private final void onePassFastmflf(String f, long fdate) {
         // no mfl no stemming no moreinfo
+        if (IDX_ZIP_CACHE) {
+            error("FATAL ERROR: IndexThisContent cant used IDX_ZIP_CACHE=true (code need to be upgraded)...");
+            error("IDX_ZIP_CACHE must be set to false");
+            System.exit(0);
+        }
+
         if (WORD_USE_STEMMER) {
             error("WORD_USE_STEMMER must be set to false");
         }
@@ -195,7 +214,9 @@ class IdxIndexer {
         }
     }
 
-    /** pour des strings individuels */
+    /**
+     * pour des strings individuels
+     */
     protected final void IndexThisContent(String f, String content) {
         DoParse a = new DoParse(content, glue.dontIndexThis);
         if (IDX_WITHDOCBAG && DO_DOCBAG) {
@@ -220,6 +241,10 @@ class IdxIndexer {
 
             glue.docstable.setSize(glue.lastRecordedDoc, a.nbToken); // enregistre la taille du document
 
+            if (IDX_ZIP_CACHE) {
+                glue.zipCache.set(glue.lastRecordedDoc, content); // enregistre le document dans le zipcache
+            }
+
             glue.lastRecordedDoc = glue.docstable.getCount();
         } else {
             glue.lastRecordedDoc++;
@@ -231,15 +256,15 @@ class IdxIndexer {
 
     }
 
-    /** pour des fichiers individuels */
+    /**
+     * pour des fichiers individuels
+     */
     private final void onePassIndexdoc(File file, String f, long fdate) {
         try {
             //msg("idx:"+f+" id:"+glue.lastRecordedDoc);
-            InputStreamReader isr = new InputStreamReader(new FileInputStream(f), DOC_ENCODING);
-            BufferedReader fin = new BufferedReader(isr);
-
-            //BufferedReader fin = new BufferedReader(new FileReader(file));
-            DoParse a = new DoParse(fin, glue.dontIndexThis);
+                     
+            String content=BytesAndFiles.file2String(f,DOC_ENCODING);
+            DoParse a = new DoParse(content, glue.dontIndexThis);
             if (IDX_WITHDOCBAG && DO_DOCBAG) {
                 DocBag.reset();
             } // for winnow or perceptron
@@ -265,20 +290,21 @@ class IdxIndexer {
                 glue.docstable.setDate(glue.lastRecordedDoc, fdate); // enregistre la date du document
 
                 glue.docstable.setSize(glue.lastRecordedDoc, a.nbToken); // enregistre la taille du document
-
+                if (IDX_ZIP_CACHE) {
+                    glue.zipCache.set(glue.lastRecordedDoc,content); // enregistre le document dans le zipcache
+                }
                 glue.lastRecordedDoc = glue.docstable.getCount();
             } else {
 
                 glue.lastRecordedDoc++;
             }// avance le compteur de doc quand mï¿½me
 
-            fin.close();
             if (glue.indexCoord.cacheOverFlow()) {
                 glue.indexCoord.freecache();
             } // start saving memory
 
-        } catch (IOException e) {
-            error("IO error", e);
+        } catch (Exception e) {
+            error("onePassIndexdoc", e);
         }
     }
 

@@ -177,6 +177,11 @@ public class ZipVector_InMemory implements ZipVector {
         }
 //        System.out.println("ZipManager.set: pos= " + pos + ", v[pos].length=" + v[pos].length + ", zipSize[pos]=" + zipSize[pos]);
     }
+   /** mets à  jour la position pos avec le fichier filename */
+    @Override
+    public void set(int pos, String filename, String encoding){
+        set(pos, BytesAndFiles.file2String(filename,encoding));
+    }
 
     /**
      * cherche la valeur à la position pos

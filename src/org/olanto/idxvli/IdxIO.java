@@ -30,6 +30,7 @@ import static org.olanto.idxvli.util.BytesAndFiles.*;
 import static org.olanto.idxvli.IdxConstant.*;
 import static org.olanto.idxvli.IdxEnum.*;
 import java.util.concurrent.locks.*;
+import org.olanto.idxvli.util.ZipVector_InMemory;
 import org.olanto.wildchar.WildCharExpander;
 
 /**
@@ -469,6 +470,11 @@ public class IdxIO {
                     DOC_ROOT, DOC_NAME, DOC_MAXBIT, DOC_SIZE_NAME);
 
             compactMemory("doc table OK");
+            if (IDX_ZIP_CACHE){
+                glue.zipCache=(new ZipVector_InMemory()).create(DOC_ROOT, ZIP_NAME, DOC_MAXBIT);
+             compactMemory("zip cache OK");
+         }
+ 
         }
         try {
             compactMemory("ready to load OK");
@@ -513,6 +519,10 @@ public class IdxIO {
             glue.docstable = (new Documents1()).open(DOC_IMPLEMENTATION, DOC_LANGUAGE, DOC_COLLECTION, MODE_IDX, DOC_ROOT, DOC_NAME);
             glue.lastRecordedDoc = glue.docstable.getCount();
             glue.lastUpdatedDoc = glue.lastRecordedDoc;  // read=write
+            if (IDX_ZIP_CACHE){
+                COMLOG.info("open zipCache");
+                glue.zipCache=(new ZipVector_InMemory()).open(DOC_ROOT, ZIP_NAME, readWriteMode.rw);
+             }
  
             if (WORD_EXPANSION) {  // pour les wildchar
             glue.wordExpander = new WildCharExpander(glue.getVocabulary());
@@ -553,6 +563,8 @@ public class IdxIO {
             ostream.close();
             glue.docstable.close();
             COMLOG.info("end of docstable save");
+            glue.zipCache.close();
+            COMLOG.info("end of zipCache save");
             glue.wordstable.close();
             COMLOG.info("end of wordstable save");
 

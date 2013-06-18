@@ -299,7 +299,7 @@ public class Server_MyCat extends UnicastRemoteObject implements IndexService_My
     public QLResultNice evalQLNice(String request, int start, int size) throws RemoteException {
         serverR.lock();
         try {
-            return id.evalQLNice(cs, request, start, size,false);
+            return id.evalQLNice(cs, request, start, size, false);
 
         } finally {
             serverR.unlock();
@@ -314,12 +314,12 @@ public class Server_MyCat extends UnicastRemoteObject implements IndexService_My
         serverR.lock();
         try {
             if (exact) {
-              QLResultNice res = id.evalQLNice(cs, request, start, Integer.MAX_VALUE, true); // pas de limite
+                QLResultNice res = id.evalQLNice(cs, request, start, Integer.MAX_VALUE, true); // pas de limite
                 res.orderBy(id, order);
                 res.checkExact(id, size);
                 return res;
             } else {  // fuzzy search
-                QLResultNice res = id.evalQLNice(cs, request, start, size,false);
+                QLResultNice res = id.evalQLNice(cs, request, start, size, false);
                 res.orderBy(id, order);
                 return res;
             }
@@ -369,12 +369,16 @@ public class Server_MyCat extends UnicastRemoteObject implements IndexService_My
 
     @Override
     public String getDoc(int docId) throws RemoteException {
-        serverR.lock();
-        try {
+        if (IDX_ZIP_CACHE) {
+            serverR.lock();
+            try {             
+                return id.zipCache.get(docId);
+            } finally {
+                serverR.unlock();
+            }
+        } else {
             msg("not implemented");
             return "no text!";
-        } finally {
-            serverR.unlock();
         }
     }
 

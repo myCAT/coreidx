@@ -155,6 +155,10 @@ public class IdxStructure {
      */
     public DocumentManager docstable;
     /**
+     * dictionnaire de documents (document->indice) (indice->document)
+     */
+    public ZipVector zipCache ;
+    /**
      * la structure comprend un indexer
      */
     public IdxIndexer Indexer;
@@ -1019,10 +1023,15 @@ public class IdxStructure {
      * check if a expression is content in a document
      */
     public boolean isExactExpInDoc(String exactExpression, int docid, String fname) {
-        String content = file2String(fname, DOC_ENCODING);
+        if (IDX_ZIP_CACHE){
+            return zipCache.get(docid).contains(exactExpression);
+        }
+        else{ // pas de cache doit lire dans les fichiers
+            String content = file2String(fname, DOC_ENCODING);
         if (content == null) {
             return false;
         }       
         return content.contains(exactExpression);
+        }
     }
 }

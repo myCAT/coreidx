@@ -129,6 +129,8 @@ public class IdxConstant {
     public static String IDX_MFLF_ENCODING = "UTF-8";
     /** cr�e des info suppl�mentaire sur les documents */
     public static boolean IDX_MORE_INFO = false;
+    /** crée un cache ZIP pour les documents */
+    public static boolean IDX_ZIP_CACHE = false;
     /** si vrai alors une indexation conceputelle sinon native dans la langue */
     public static boolean IDX_CONCEPTUAL = true;
     /** marqueur de document actif*/
@@ -165,6 +167,8 @@ public class IdxConstant {
     public static String DOC_ROOT = COMMON_ROOT;
     /** extention des noms du document manager  */
     public static String DOC_NAME = "DOC";
+  /** extention des noms du document manager  */
+    public static String ZIP_NAME = "ZIP";
     /** taille maximum des noms de documents */
     public static int DOC_SIZE_NAME = 128;
     /** taille maximum d'un document*/
@@ -346,6 +350,7 @@ public class IdxConstant {
                 + "\n    IDX_SAVE_POSITION: " + IDX_SAVE_POSITION
                 + "\n    IDX_MORE_INFO: " + IDX_MORE_INFO
                 + "\n    IDX_CONCEPTUAL: " + IDX_CONCEPTUAL
+                + "\n    IDX_ZIP_CACHE: " + IDX_CONCEPTUAL
                 + "\nSTRATEGIES"
                 + "\n    DOC_IMPLEMENTATION: " + DOC_IMPLEMENTATION
                 + "\n         DOC_MAX: " + DOC_MAX

@@ -44,6 +44,8 @@ public interface ZipVector {
 
     /** mets à  jour la position pos avec txt */
     public void set(int pos, String txt);
+   /** mets à  jour la position pos avec le fichier filename */
+    public void set(int pos, String filename, String encoding);
 
     /** élimine le vecteur a la position pos */
     public void clear(int pos);

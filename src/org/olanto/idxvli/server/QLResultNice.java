@@ -136,7 +136,7 @@ public class QLResultNice implements Serializable {
         int beg = query.indexOf("QUOTATION(\"");
         int end = query.indexOf("\")");
         if (end == -1 || beg == -1) {  // no result
-            System.out.println("Error: Quey is not QUOTATION(\"....\") no filtering for exact matching");
+            System.out.println("Error: Query is not QUOTATION(\"....\") no filtering for exact matching");
             return;
         }
         exactExpression = query.substring(beg + 11, end);
@@ -159,11 +159,7 @@ public class QLResultNice implements Serializable {
         }
 
         // compress result
-       if (verbose) {
-            System.out.println("countcheckfile: " + countcheckfile);
-            System.out.println("countexact: " + lastexact);
-        }
-
+ 
         int[] exactResult = new int[lastexact];
         String[] exactDocname = new String[lastexact];
         String[] exactTitle = new String[lastexact];
@@ -192,8 +188,9 @@ public class QLResultNice implements Serializable {
         
         durationExactFiltering = time.getstop();
         if (verbose) {
-            System.out.println("duration of check exact expression: " + durationExactFiltering + " (ms)");
-        }
+            System.out.println("duration of check exact expression: " + durationExactFiltering + " (ms)"+
+                    " #checkfile: " + countcheckfile+" #exact: " + lastexact+" for:\"" + exactExpression + "\"");
+       }
         }
 
     }
